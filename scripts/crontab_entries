@@ -1,0 +1,20 @@
+# ==============================================================================
+# WindWatch Cloud VM Crontab Automation Schedule Entries
+# Copy these lines into the root user's crontab using 'sudo crontab -e'
+# ==============================================================================
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=cloud-operations@windwatch.local
+
+# 1. Run database backup daily at 2:00 AM, output logs to backup file
+0 2 * * * /Users/rajneesharya/Desktop/aws/scripts/backup.sh >> /var/log/windwatch/cron_backup.log 2>&1
+
+# 2. Trigger log rotation utility daily at 1:00 AM to keep disk clean
+0 1 * * * /usr/sbin/logrotate /etc/logrotate.d/windwatch >> /var/log/windwatch/cron_logrotate.log 2>&1
+
+# 3. Purge temporary and cache files older than 3 days, daily at 3:30 AM
+30 3 * * * find /var/www/windwatch/temp/ -type f -mtime +3 -delete >/dev/null 2>&1
+
+# 4. Perform a lightweight ping check to verify API and DB container health hourly
+0 * * * * docker exec windwatch-web nginx -t >/dev/null 2>&1 || (echo "Nginx configuration check failed!" | mail -s "CRITICAL: WindWatch Web Check Failed" cloud-operations@windwatch.local)

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WindWatch | Wind Turbine Analytics Cloud Portal</title>
+  
+  <!-- FontAwesome Icons & Stylesheet -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Chart.js for beautiful graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo-container">
+        <i class="fa-solid fa-wind logo-icon"></i>
+        <div class="logo-text">
+          WindWatch
+          <span>Analytics Cloud</span>
+        </div>
+      </div>
+      
+      <nav style="flex-grow: 1;">
+        <ul class="nav-menu">
+          <li class="nav-item active" data-view="overview">
+            <a class="nav-link"><i class="fa-solid fa-chart-line"></i>Overview & Analytics</a>
+          </li>
+          <li class="nav-item" data-view="infrastructure">
+            <a class="nav-link"><i class="fa-solid fa-network-wired"></i>Cloud Infrastructure</a>
+          </li>
+          <li class="nav-item" data-view="database">
+            <a class="nav-link"><i class="fa-solid fa-database"></i>Data & Backups</a>
+          </li>
+          <li class="nav-item" data-view="workflow">
+            <a class="nav-link"><i class="fa-solid fa-shuffle"></i>Workflows & Alerts</a>
+          </li>
+          <li class="nav-item" data-view="calculator">
+            <a class="nav-link"><i class="fa-solid fa-calculator"></i>TCO Cost Calculator</a>
+          </li>
+          <li class="nav-item" data-view="scripts">
+            <a class="nav-link"><i class="fa-solid fa-code"></i>Automation Scripts</a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="system-status-indicator">
+          <span class="status-dot"></span>
+          <span>Cloud Infrastructure Sync: ACTIVE</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="region-selector-wrapper">
+            <label for="regionSelect"><i class="fa-solid fa-globe"></i> Region:</label>
+            <select id="regionSelect" class="region-select">
+              <option value="north_sea">North Sea Offshore Cluster</option>
+              <option value="texas_plains">Texas Plains Farm</option>
+              <option value="apac_coastal">APAC Coastal Network</option>
+              <option value="patagonia_wind">Patagonia High-Wind Zone</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="topbar-right">
+          <div class="rbac-wrapper">
+            <label for="roleSelect"><i class="fa-solid fa-user-shield"></i> Identity Access:</label>
+            <select id="roleSelect" class="role-select">
+              <option value="operator">Operator (ww_operator)</option>
+              <option value="manager">Manager (ww_manager)</option>
+              <option value="admin">Administrator (ww_admin)</option>
+            </select>
+          </div>
+          
+          <div id="systemClock" class="timestamp">2026-06-20 15:42:00</div>
+        </div>
+      </header>
+
+      <!-- Viewport for different tab content -->
+      <div class="view-viewport">
+        
+        <!-- ================= OVERVIEW VIEW ================= -->
+        <section id="overviewView" class="dashboard-view active">
+          <div class="view-header">
+            <div class="view-header-title">
+              <h2>Operational Overview & Analytics</h2>
+              <p>Real-time telemetry streams, region monitoring, and generation yields.</p>
+            </div>
+            <div class="timestamp" id="telemetryStatus" style="color: var(--primary); font-weight: bold; border-color: var(--border-active);">
+              <i class="fa-solid fa-satellite-dish"></i> Telemetry Live
+            </div>
+          </div>
+
+          <!-- KPI Cards Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon-container primary">
+                <i class="fa-solid fa-bolt"></i>
+              </div>
+              <div class="kpi-details">
+                <span class="kpi-label">Active Power Yield</span>
+                <span class="kpi-value" id="kpi-power">342.8 MW</span>
+                <span class="kpi-trend positive"><i class="fa-solid fa-arrow-up"></i> +4.2% yield</span>
+              </div>
+            </div>
+            
+            <div class="kpi-card">
+              <div class="kpi-icon-container secondary">
+                <i class="fa-solid fa-gauge-simple-high"></i>
+              </div>
+              <div class="kpi-details">
+                <span class="kpi-label">Avg Wind Speed</span>
+                <span class="kpi-value" id="kpi-wind">14.2 m/s</span>
+                <span class="kpi-trend positive"><i class="fa-solid fa-wind"></i> Stable breeze</span>
+              </div>
+            </div>
+            
+            <div class="kpi-card">
+              <div class="kpi-icon-container accent">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+              <div class="kpi-details">
+                <span class="kpi-label">Online Turbines</span>
+                <span class="kpi-value" id="kpi-turbines">48 / 50</span>
+                <span class="kpi-trend neutral"><i class="fa-solid fa-circle-info"></i> 2 in maintenance</span>
+              </div>
+            </div>
+            
+            <div class="kpi-card">
+              <div class="kpi-icon-container warning">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div class="kpi-details">
+                <span class="kpi-label">Active Alerts</span>
+                <span class="kpi-value" id="kpi-alerts" style="color: var(--warning);">3</span>
+                <span class="kpi-trend negative" id="kpi-alert-trend"><i class="fa-solid fa-arrow-up"></i> +1 in last hr</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts and Analytics Grid -->
+          <div class="analytics-grid">
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <span class="dashboard-card-title"><i class="fa-solid fa-chart-area"></i> Power Yield History vs. Demand (24h)</span>
+                <span class="timestamp">Updates every 5s</span>
+              </div>
+              <div class="chart-container">
+                <canvas id="powerYieldChart"></canvas>
+              </div>
+            </div>
+            
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <span class="dashboard-card-title"><i class="fa-solid fa-circle-notch"></i> Turbine Status Mix</span>
+              </div>
+              <div class="chart-container" style="height: 320px; display: flex; align-items: center; justify-content: center;">
+                <canvas id="statusMixChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Turbine Detail Log -->
+          <div class="dashboard-card" style="margin-bottom: 2rem;">
+            <div class="dashboard-card-header">
+              <span class="dashboard-card-title"><i class="fa-solid fa-list"></i> Critical Turbine Nodes Status</span>
+              <button class="action-btn" id="refreshTelemetryBtn"><i class="fa-solid fa-rotate"></i> Reload Telemetry</button>
+            </div>
+            <div class="turbine-list-wrapper">
+              <table class="turbine-mini-table">
+                <thead>
+                  <tr>
+                    <th>Turbine ID</th>
+                    <th>Model</th>
+                    <th>Region</th>
+                    <th>Wind Speed</th>
+                    <th>Power Output</th>
+                    <th>Rotor Temp</th>
+                    <th>System Status</th>
+                  </tr>
+                </thead>
+                <tbody id="turbineTelemetryTableBody">
+                  <!-- Javascript updates these rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= INFRASTRUCTURE VIEW ================= -->
+        <section id="infrastructureView" class="dashboard-view">
+          <div class="view-header">
+            <div class="view-header-title">
+              <h2>Cloud Infrastructure & VM Admin</h2>
+              <p>Explore the WindWatch VPC design and execute operations in real-time via the VM dashboard shell.</p>
+            </div>
+          </div>
+
+          <div class="topology-container">
+            <!-- Left Side: VPC Architecture Map -->
+            <div class="dashboard-card network-map-card">
+              <div class="dashboard-card-header">
+                <span class="dashboard-card-title"><i class="fa-solid fa-diagram-project"></i> Virtual Private Cloud (VPC) Topology</span>
+                <span class="timestamp" style="font-size: 0.75rem;">Click a node to inspect & configure</span>
+              </div>
+              <div class="network-svg-wrapper">
+                <svg viewBox="0 0 500 350" class="network-svg">
+                  <!-- VPC Boundary Box -->
+                  <rect x="10" y="10" width="480" height="330" rx="0" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5,5"/>
+                  <text x="25" y="30" fill="var(--accent)" font-size="10" font-weight="bold" font-family="var(--font-sans)">VPC (172.24.0.0/16)</text>
+
+                  <!-- Internet Gateway (IGW) -->
+                  <g class="svg-node" data-node="igw" transform="translate(250, 40)">
+                    <rect x="-16" y="-16" width="32" height="32" rx="0" fill="var(--bg-surface-elevated)" stroke="var(--border)" stroke-width="1.5"/>
+                    <text x="0" y="25" text-anchor="middle" class="node-label">IGW</text>
+                    <text x="0" y="33" text-anchor="middle" class="node-sublabel">0.0.0.0/0</text>
+                    <path d="M-6,-4 L6,-4 M-6,4 L6,4 M-4,-8 L4,-8 M0,-8 L0,8" stroke="var(--secondary)" stroke-width="1.5" fill="none"/>
+                  </g>
+
+                  <!-- Public Subnet Box -->
+                  <rect x="30" y="90" width="200" height="230" rx="0" fill="none" stroke="var(--info)" stroke-width="1.5" stroke-dasharray="2,2"/>
+                  <text x="40" y="105" fill="var(--info)" font-size="9" font-family="var(--font-sans)" font-weight="600">Public Subnet (172.24.1.0/24)</text>
+
+                  <!-- Private Subnet Box -->
+                  <rect x="270" y="90" width="200" height="230" rx="0" fill="none" stroke="var(--warning)" stroke-width="1.5" stroke-dasharray="2,2"/>
+                  <text x="280" y="105" fill="var(--warning)" font-size="9" font-family="var(--font-sans)" font-weight="600">Private Subnet (172.24.2.0/24)</text>
+
+                  <!-- Connections -->
+                  <!-- IGW to LoadBalancer -->
+                  <line x1="250" y1="56" x2="130" y2="140" stroke="var(--border)" stroke-width="1"/>
+                  <!-- NAT Gateway from Public to Private -->
+                  <line x1="180" y1="260" x2="320" y2="200" stroke="var(--border)" stroke-width="1" stroke-dasharray="4,4"/>
+
+                  <!-- Public Subnet Nodes -->
+                  <!-- Nginx Load Balancer -->
+                  <g class="svg-node selected" id="node-nginx" data-node="nginx" transform="translate(130, 150)">
+                    <rect x="-24" y="-20" width="48" height="40" rx="0" fill="var(--bg-surface-elevated)" stroke="var(--primary)" stroke-width="1.5"/>
+                    <text x="0" y="5" text-anchor="middle" class="node-label">Nginx Proxy</text>
+                    <text x="0" y="14" text-anchor="middle" class="node-sublabel">VM-Web-01</text>
+                    <i class="fa-solid fa-server" style="display:none"></i>
+                  </g>
+                  
+                  <!-- NAT Gateway -->
+                  <g class="svg-node" data-node="nat" transform="translate(130, 260)">
+                    <rect x="-24" y="-20" width="48" height="40" rx="0" fill="var(--bg-surface-elevated)" stroke="var(--border)" stroke-width="1"/>
+                    <text x="0" y="5" text-anchor="middle" class="node-label">NAT GW</text>
+                    <text x="0" y="14" text-anchor="middle" class="node-sublabel">172.24.1.254</text>
+                  </g>
+
+                  <!-- Private Subnet Nodes -->
+                  <!-- App API Server -->
+                  <g class="svg-node" data-node="app" transform="translate(370, 150)">
+                    <rect x="-24" y="-20" width="48" height="40" rx="0" fill="var(--bg-surface-elevated)" stroke="var(--border)" stroke-width="1"/>
+                    <text x="0" y="5" text-anchor="middle" class="node-label">App API</text>
+                    <text x="0" y="14" text-anchor="middle" class="node-sublabel">VM-App-01</text>
+                  </g>
+
+                  <!-- MariaDB Database Server -->
+                  <g class="svg-node" data-node="database" transform="translate(320, 260)">
+                    <rect x="-24" y="-20" width="48" height="40" rx="0" fill="var(--bg-surface-elevated)" stroke="var(--border)" stroke-width="1"/>
+                    <text x="0" y="5" text-anchor="middle" class="node-label">MariaDB DB</text>
+                    <text x="0" y="14" text-anchor="middle" class="node-sublabel">VM-DB-01</text>
+                  </g>
+
+                  <!-- Redis Cache Server -->
+                  <g class="svg-node" data-node="cache" transform="translate(420, 260)">
+                    <rect x="-24" y="-20" width="48" height="40" rx="0" fill="var(--bg-surface-elevated)" stroke="var(--border)" stroke-width="1"/>
+                    <text x="0" y="5" text-anchor="middle" class="node-label">Redis Cache</text>
+                    <text x="0" y="14" text-anchor="middle" class="node-sublabel">VM-Cache-01</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Right Side: Terminal Command Console Simulator -->
+            <div class="dashboard-card terminal-card">
+              <div class="terminal-header">
+                <div class="terminal-dots">
+                  <span class="terminal-dot red"></span>
+                  <span class="terminal-dot yellow"></span>
+                  <span class="terminal-dot green"></span>
+                </div>
+                <div class="terminal-node-name" id="selectedNodeLabel">Target Server: VM-Web-01 (Nginx Proxy)</div>
+              </div>
+              <div class="terminal-screen" id="terminalScreen">
+Welcome to WindWatch Secure Operations Shell v2.4
+Connecting to ww_operator@VM-Web-01 (172.24.1.10)... Connected.
+System status: ONLINE | Load: 0.12, 0.08, 0.02
+
+ww_operator@VM-Web-01:~$ <span class="terminal-cursor"></span>
+              </div>
+              
+              <!-- Quick Execution Shell Commands -->
+              <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-top: 1rem; font-weight: 600;">Run Automated Diagnostics:</h4>
+              <div class="terminal-action-buttons">
+                <button class="action-btn" data-cmd="systemctl_status"><i class="fa-solid fa-heartbeat"></i> Check Service Status</button>
+                <button class="action-btn" data-cmd="docker_ps"><i class="fa-brands fa-docker"></i> docker ps -a</button>
+                <button class="action-btn" data-cmd="system_resources"><i class="fa-solid fa-microchip"></i> VM CPU/Memory Load</button>
+                <button class="action-btn" data-cmd="service_restart"><i class="fa-solid fa-rotate-right"></i> systemctl restart nginx</button>
+                <button class="action-btn" data-cmd="view_logs"><i class="fa-solid fa-file-lines"></i> View /var/log/syslog</button>
+                <button class="action-btn" id="clearTerminalBtn" style="background-color: transparent;"><i class="fa-solid fa-trash-can"></i> Clear</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= DATA & BACKUPS VIEW ================= -->
+        <section id="databaseView" class="dashboard-view">
+          <div class="view-header">
+            <div class="view-header-title">
+              <h2>MySQL/MariaDB Databases & Backups</h2>
+              <p>Manage operational data records, examine MySQL structures, and initiate backup schedules.</p>
+            </div>
+            <button class="btn btn-primary" id="triggerBackupBtn"><i class="fa-solid fa-cloud-arrow-up"></i> Run Manual DB Backup</button>
+          </div>
+
+          <div class="database-layout">
+            <!-- Left Side: Table Schemas -->
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <span class="dashboard-card-title"><i class="fa-solid fa-sitemap"></i> Database Schema: windwatch_analytics</span>
+                <span class="timestamp" style="font-size: 0.75rem;">MariaDB 10.11 Engine</span>
+              </div>
+              
+              <div class="schema-node">
+                <div class="schema-node-title">
+                  <span>turbines (Operational Assets)</span>
+                  <i class="fa-solid fa-table"></i>
+                </div>
+                <ul class="schema-node-fields">
+                  <li><span class="schema-field-name">id</span> <span class="schema-field-key">INT PRIMARY KEY AUTO_INCREMENT</span></li>
+                  <li><span class="schema-field-name">name</span> <span class="schema-field-type">VARCHAR(50) NOT NULL</span></li>
+                  <li><span class="schema-field-name">region</span> <span class="schema-field-type">VARCHAR(100)</span></li>
+                  <li><span class="schema-field-name">status</span> <span class="schema-field-type">ENUM('ACTIVE', 'MAINTENANCE', 'OFFLINE')</span></li>
+                </ul>
+              </div>
+
+              <div class="schema-node">
+                <div class="schema-node-title">
+                  <span>telemetry_logs (High-frequency inputs)</span>
+                  <i class="fa-solid fa-table"></i>
+                </div>
+                <ul class="schema-node-fields">
+                  <li><span class="schema-field-name">log_id</span> <span class="schema-field-key">BIGINT PRIMARY KEY AUTO_INCREMENT</span></li>
+                  <li><span class="schema-field-name">turbine_id</span> <span class="schema-field-type">INT FOREIGN KEY</span></li>
+                  <li><span class="schema-field-name">wind_speed</span> <span class="schema-field-type">DECIMAL(5,2)</span></li>
+                  <li><span class="schema-field-name">power_kw</span> <span class="schema-field-type">DECIMAL(7,2)</span></li>
+                  <li><span class="schema-field-name">rotor_temp_c</span> <span class="schema-field-type">DECIMAL(5,2)</span></li>
+                  <li><span class="schema-field-name">logged_at</span> <span class="schema-field-type">TIMESTAMP DEFAULT NOW()</span></li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Right Side: Backup Operations Terminal Logs -->
+            <div class="dashboard-card" style="display:flex; flex-direction:column;">
+              <div class="dashboard-card-header">
+                <span class="dashboard-card-title"><i class="fa-solid fa-clock-rotate-left"></i> Backup Process Monitor</span>
+              </div>
+              <div class="terminal-screen" id="backupLogScreen" style="height: 330px; background-color: #04080e; color: #38bdf8;">
+[i] Database Backup Daemon Listening...
+[i] Automatic cron schedules: Daily 02:00 AM
+[i] S3 Replication Endpoint: s3://windwatch-dr-backups/database/
+              </div>
+            </div>
+          </div>
+
+          <!-- Operations Audit Logs / Database table -->
+          <div class="dashboard-card" style="margin-bottom: 2rem;">
+            <div class="dashboard-card-header">
+              <span class="dashboard-card-title"><i class="fa-solid fa-history"></i> Backup History and Replication Index</span>
+              <span class="turbine-status-badge active" style="font-size:0.75rem;">RPO Status: OPTIMAL (6h)</span>
+            </div>
+            <div class="table-responsive">
+              <table class="windwatch-table">
+                <thead>
+                  <tr>
+                    <th>Backup Job ID</th>
+                    <th>Target File</th>
+                    <th>Size</th>
+                    <th>Database</th>
+                    <th>Storage Location</th>
+                    <th>Execution Time</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="backupHistoryTableBody">
+                  <tr>
+                    <td>#JOB-9844</td>
+                    <td>windwatch_analytics_backup_20260620_020001.sql.gz</td>
+                    <td>142.4 MB</td>
+                    <td>windwatch_analytics</td>
+                    <td>Local &amp; AWS S3 (Glacier)</td>
+                    <td>2026-06-20 02:00:01</td>
+                    <td><span class="turbine-status-badge active"><i class="fa-solid fa-check"></i> Success</span></td>
+                  </tr>
+                  <tr>
+                    <td>#JOB-9801</td>
+                    <td>windwatch_analytics_backup_20260619_020002.sql.gz</td>
+                    <td>141.9 MB</td>
+                    <td>windwatch_analytics</td>
+                    <td>Local &amp; AWS S3 (Glacier)</td>
+                    <td>2026-06-19 02:00:02</td>
+                    <td><span class="turbine-status-badge active"><i class="fa-solid fa-check"></i> Success</span></td>
+                  </tr>
+                  <tr>
+                    <td>#JOB-9759</td>
+                    <td>windwatch_analytics_backup_20260618_020001.sql.gz</td>
+                    <td>141.2 MB</td>
+                    <td>windwatch_analytics</td>
+                    <td>Local &amp; AWS S3 (Glacier)</td>
+                    <td>2026-06-18 02:00:01</td>
+                    <td><span class="turbine-status-badge active"><i class="fa-solid fa-check"></i> Success</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= WORKFLOW VIEW ================= -->
+        <section id="workflowView" class="dashboard-view">
+          <div class="view-header">
+            <div class="view-header-title">
+              <h2>Workflow &amp; Alert Management</h2>
+              <p>Investigate active incidents, trigger technician dispatches, and approve maintenance workflows.</p>
+            </div>
+            <button class="btn btn-danger" id="simulateAlertBtn"><i class="fa-solid fa-fire"></i> Simulate Turbine Incident</button>
+          </div>
+
+          <!-- Workflow Visual Progression -->
+          <div class="dashboard-card" style="margin-bottom: 2rem;">
+            <div class="dashboard-card-header">
+              <span class="dashboard-card-title"><i class="fa-solid fa-share-nodes"></i> Active Workflow: Turbine Maintenance Approval Chain</span>
+              <span id="activeWorkflowId" class="timestamp" style="color: var(--secondary); font-weight:600;">TICKET #INC-773</span>
+            </div>
+            
+            <div class="workflow-diagram">
+              <div class="workflow-step completed" id="wf-step-1">
+                <div class="workflow-step-badge"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="workflow-step-title">1. Telemetry Alert</div>
+                <div class="workflow-step-desc" id="wf-desc-1">Rotor Temperature > 95°C</div>
+              </div>
+              <div class="workflow-step completed" id="wf-step-2">
+                <div class="workflow-step-badge"><i class="fa-solid fa-user-gear"></i></div>
+                <div class="workflow-step-title">2. Operator Dispatch</div>
+                <div class="workflow-step-desc" id="wf-desc-2">Assigned to ww_operator</div>
+              </div>
+              <div class="workflow-step active" id="wf-step-3">
+                <div class="workflow-step-badge"><i class="fa-solid fa-clipboard-check"></i></div>
+                <div class="workflow-step-title">3. Manager Approval</div>
+                <div class="workflow-step-desc" id="wf-desc-3">Awaiting ticket signoff</div>
+              </div>
+              <div class="workflow-step" id="wf-step-4">
+                <div class="workflow-step-badge"><i class="fa-solid fa-check-double"></i></div>
+                <div class="workflow-step-title">4. Resolution &amp; Lock</div>
+                <div class="workflow-step-desc">Audit entry recorded</div>
+              </div>
+            </div>
+
+            <!-- Workflow Control panel -->
+            <div class="workflow-actions-panel">
+              <div class="workflow-assigned-info">
+                <i class="fa-solid fa-user-tie" style="font-size: 2.2rem; color: var(--secondary)"></i>
+                <div>
+                  <h4 style="font-size:0.9rem; font-weight:600;" id="workflowDetailsTitle">Turbine #14 (North Sea) Brake System Overheat</h4>
+                  <p style="font-size:0.75rem; color: var(--text-muted);" id="workflowDetailsMeta">Reported: Today 14:10 | Severity: Critical</p>
+                </div>
+              </div>
+              <div class="workflow-buttons">
+                <button class="btn btn-secondary" id="wf-reject-btn"><i class="fa-solid fa-circle-xmark"></i> Reject Workflow</button>
+                <button class="btn btn-primary" id="wf-approve-btn"><i class="fa-solid fa-signature"></i> Approve Dispatch</button>
+              </div>
+            </div>
+            
+            <div id="rbacWarningBanner" style="display:none; color: var(--danger); font-size: 0.8rem; font-weight: bold; text-align: center; margin-top: -1rem; margin-bottom: 1rem;">
+              <i class="fa-solid fa-ban"></i> Access Denied: Administrator or Manager role required to execute approvals.
+            </div>
+          </div>
+
+          <!-- Incidents History Table -->
+          <div class="dashboard-card" style="margin-bottom: 2rem;">
+            <div class="dashboard-card-header">
+              <span class="dashboard-card-title"><i class="fa-solid fa-shield-halved"></i> Active Incidents Queue</span>
+            </div>
+            <div class="table-responsive">
+              <table class="windwatch-table">
+                <thead>
+                  <tr>
+                    <th>Incident ID</th>
+                    <th>Target Resource</th>
+                    <th>Description</th>
+                    <th>Severity</th>
+                    <th>Assigned To</th>
+                    <th>Current Step</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="incidentsQueueTableBody">
+                  <!-- Javascript populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PRICING CALCULATOR VIEW ================= -->
+        <section id="calculatorView" class="dashboard-view">
+          <div class="view-header">
+            <div class="view-header-title">
+              <h2>Infrastructure TCO Calculator</h2>
+              <p>Estimate cloud resource costs for compute, storage, and networking across multiple regions.</p>
+            </div>
+          </div>
+
+          <div class="calculator-layout">
+            <!-- Left Side: Sliders and Selections -->
+            <div class="dashboard-card" style="display:flex; flex-direction:column; gap: 1.5rem;">
+              <div class="dashboard-card-header">
+                <span class="dashboard-card-title"><i class="fa-solid fa-server"></i> Configure Cluster Capacity</span>
+              </div>
+              
+              <div class="calc-sliders">
+                <!-- Compute slider -->
+                <div class="slider-group">
+                  <div class="slider-header">
+                    <span class="slider-label">Compute Instances (VMs)</span>
+                    <span class="slider-val-badge" id="calc-instances-val">10 VMs</span>
+                  </div>
+                  <input type="range" id="calc-instances" class="range-slider" min="2" max="100" value="10">
+                </div>
+
+                <!-- SSD Storage slider -->
+                <div class="slider-group">
+                  <div class="slider-header">
+                    <span class="slider-label">Block SSD Storage (GB)</span>
+                    <span class="slider-val-badge" id="calc-storage-val">500 GB</span>
+                  </div>
+                  <input type="range" id="calc-storage" class="range-slider" min="100" max="10000" step="100" value="500">
+                </div>
+
+                <!-- Bandwidth slider -->
+                <div class="slider-group">
+                  <div class="slider-header">
+                    <span class="slider-label">Outbound Network Data Transfer (TB / month)</span>
+                    <span class="slider-val-badge" id="calc-transfer-val">5 TB</span>
+                  </div>
+                  <input type="range" id="calc-transfer" class="range-slider" min="1" max="100" value="5">
+                </div>
+              </div>
+
+              <!-- Options dropdown grid -->
+              <div class="calc-options-grid">
+                <div class="option-group">
+                  <label for="calc-redundancy"><i class="fa-solid fa-clone"></i> Deployment Type</label>
+                  <select id="calc-redundancy" class="select-control">
+                    <option value="single">Single Region (Basic)</option>
+                    <option value="multi-az">Multi-AZ Redundancy</option>
+                    <option value="multi-region">Multi-Region Active-Active</option>
+                  </select>
+                </div>
+                
+                <div class="option-group">
+                  <label for="calc-backup"><i class="fa-solid fa-shield-cat"></i> Backup Policy (RTO/RPO)</label>
+                  <select id="calc-backup" class="select-control">
+                    <option value="weekly">Weekly Backups (Cheap)</option>
+                    <option value="daily">Daily Incremental (Recommended)</option>
+                    <option value="realtime">Continuous Stream (Glacier Archive)</option>
+                  </select>
+                </div>
+
+                <div class="option-group">
+                  <label for="calc-sla"><i class="fa-solid fa-headset"></i> Monitoring &amp; SLA Tier</label>
+                  <select id="calc-sla" class="select-control">
+                    <option value="dev">99.0% SLA - Dev Support</option>
+                    <option value="business">99.9% SLA - Business 24/7</option>
+                    <option value="enterprise">99.99% SLA - Enterprise Dedicated</option>
+                  </select>
+                </div>
+
+                <div class="option-group">
+                  <label for="calc-purchasing"><i class="fa-solid fa-tags"></i> Purchasing Model</label>
+                  <select id="calc-purchasing" class="select-control">
+                    <option value="ondemand">On-Demand Rates</option>
+                    <option value="reserved">Reserved Instances (3-yr Commit, -50%)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side: Total calculations summary -->
+            <div class="dashboard-card pricing-summary-card">
+              <div class="total-price-header">
+                <span class="price-label">Estimated Monthly Cost</span>
+                <div class="total-price-amount" id="totalMonthlyCost">$1,450.00</div>
+                <span style="font-size:0.75rem; color: var(--text-muted);">Pricing in USD, regional taxes excluded</span>
+              </div>
+              
+              <ul class="price-breakdown-list">
+                <li class="price-breakdown-item">
+                  <span class="price-item-label"><i class="fa-solid fa-microchip"></i> Compute (VM Host)</span>
+                  <span class="price-item-val" id="cost-compute">$800.00</span>
+                </li>
+                <li class="price-breakdown-item">
+                  <span class="price-item-label"><i class="fa-solid fa-hdd"></i> Storage (SSD Volumes)</span>
+                  <span class="price-item-val" id="cost-storage">$50.00</span>
+                </li>
+                <li class="price-breakdown-item">
+                  <span class="price-item-label"><i class="fa-solid fa-arrows-spin"></i> Network Outbound</span>
+                  <span class="price-item-val" id="cost-network">$250.00</span>
+                </li>
+                <li class="price-breakdown-item">
+                  <span class="price-item-label"><i class="fa-solid fa-floppy-disk"></i> Backup &amp; Recovery</span>
+                  <span class="price-item-val" id="cost-backup">$100.00</span>
+                </li>
+                <li class="price-breakdown-item">
+                  <span class="price-item-label"><i class="fa-solid fa-life-ring"></i> Monitoring Support</span>
+                  <span class="price-item-val" id="cost-support">$250.00</span>
+                </li>
+              </ul>
+
+              <div class="optimization-card">
+                <div class="optimization-card-title">
+                  <i class="fa-solid fa-lightbulb"></i> Optimization Recommendations
+                </div>
+                <div class="optimization-card-text" id="optimizationAdvice">
+                  Switching VM Instances to a Reserved purchasing model would save roughly $400.00 each month.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= SCRIPTS VIEW ================= -->
+        <section id="scriptsView" class="dashboard-view">
+          <div class="view-header">
+            <div class="view-header-title">
+              <h2>Infrastructure Automation Repository</h2>
+              <p>Review deployable scripts, Docker orchestrators, and server config blocks used to provision WindWatch.</p>
+            </div>
+            <button class="btn btn-secondary" id="copyCodeBtn"><i class="fa-solid fa-copy"></i> Copy Script Content</button>
+          </div>
+
+          <div class="scripts-browser-layout">
+            <!-- Left panel: File Selector -->
+            <ul class="scripts-list-panel">
+              <li>
+                <button class="script-tab-btn active" data-file="setup_users"><i class="fa-solid fa-users-gear"></i> setup_users.sh</button>
+              </li>
+              <li>
+                <button class="script-tab-btn" data-file="deploy"><i class="fa-solid fa-cloud-arrow-up"></i> deploy.sh</button>
+              </li>
+              <li>
+                <button class="script-tab-btn" data-file="backup"><i class="fa-solid fa-shield-halved"></i> backup.sh</button>
+              </li>
+              <li>
+                <button class="script-tab-btn" data-file="docker_compose"><i class="fa-brands fa-docker"></i> docker-compose.yml</button>
+              </li>
+              <li>
+                <button class="script-tab-btn" data-file="nginx_conf"><i class="fa-solid fa-server"></i> nginx.conf</button>
+              </li>
+              <li>
+                <button class="script-tab-btn" data-file="crontab"><i class="fa-solid fa-calendar-days"></i> crontab_entries</button>
+              </li>
+            </ul>
+
+            <!-- Right panel: Code Viewer -->
+            <div class="script-viewer-panel">
+              <div class="script-viewer-header">
+                <div class="script-meta">
+                  <span class="script-filename" id="currentScriptFilename">setup_users.sh</span>
+                  <span class="script-desc" id="currentScriptDesc">Configures Linux permissions, user roles, groups, and SSH policies.</span>
+                </div>
+                <div class="timestamp" style="font-size:0.75rem;"><i class="fa-solid fa-terminal"></i> BASH Shell Script</div>
+              </div>
+              <div class="code-wrapper">
+                <pre><code id="scriptCodeBlock">Loading script content...</code></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Main JavaScript Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # Nginx Reverse Proxy (Handles SSL, static files, and directs API traffic)
+  web:
+    image: nginx:alpine
+    container_name: windwatch-web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - web_static:/usr/share/nginx/html:ro
+      - web_logs:/var/log/nginx
+    depends_on:
+      - app
+    networks:
+      - windwatch-net
+    restart: always
+
+  # WindWatch Backend API Server (FastAPI / Node.js)
+  app:
+    image: windwatch/turbine-analytics-api:latest
+    container_name: windwatch-app-api
+    expose:
+      - "8000"
+    environment:
+      - DATABASE_URL=mysql+pymysql://ww_admin:SecureWindPassword2026!@db:3306/windwatch_analytics
+      - REDIS_URL=redis://cache:6379/0
+      - LOG_DIR=/var/log/windwatch
+      - ENVIRONMENT=production
+    volumes:
+      - app_logs:/var/log/windwatch
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_started
+    networks:
+      - windwatch-net
+    restart: always
+
+  # Database Service (MariaDB for persistent operational records and logs)
+  db:
+    image: mariadb:10.11
+    container_name: windwatch-db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=windwatch_analytics
+      - MYSQL_USER=ww_admin
+      - MYSQL_PASSWORD=SecureWindPassword2026!
+      - MYSQL_ROOT_PASSWORD=SuperSecureWindRootPassword2026!
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - windwatch-net
+    restart: always
+
+  # Caching Cache Layer (Redis for high-speed wind telemetry ingestion)
+  cache:
+    image: redis:7-alpine
+    container_name: windwatch-cache
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - windwatch-net
+    restart: always
+
+volumes:
+  db_data:
+    driver: local
+  redis_data:
+    driver: local
+  web_static:
+    driver: local
+  web_logs:
+    driver: local
+  app_logs:
+    driver: local
+
+networks:
+  windwatch-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.24.0.0/16
