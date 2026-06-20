@@ -339,6 +339,17 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Copy Compose configuration via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: \${{ secrets.EC2_HOST }}
+          username: \${{ secrets.EC2_USER }}
+          key: \${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: "scripts/docker-compose.yml,scripts/nginx.conf"
+          target: "~/windwatch/"
+          strip_components: 1
+
       - name: Execute Remote SSH CD Commands
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -348,11 +359,10 @@ jobs:
           port: 22
           script: |
             set -euo pipefail
+            cd ~/windwatch
             echo "\${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u \${{ github.actor }} --password-stdin
-            docker pull ghcr.io/\${{ env.IMAGE_NAME }}:latest
-            docker stop windwatch-app || true
-            docker rm windwatch-app || true
-            docker run -d --name windwatch-app -p 80:80 --restart always ghcr.io/\${{ env.IMAGE_NAME }}:latest
+            docker compose pull
+            docker compose up -d
             docker image prune -f`
   }
 };
