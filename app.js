@@ -282,8 +282,77 @@ MAILTO=cloud-operations@windwatch.local
 # 3. Purge temporary and cache files older than 3 days, daily at 3:30 AM
 30 3 * * * find /var/www/windwatch/temp/ -type f -mtime +3 -delete >/dev/null 2>&1
 
-# 4. Perform a health check verification on web services hourly
-0 * * * * curl -s -o /dev/null -w "%{http_code}" http://localhost | grep 200 >/dev/null || echo "WindWatch Web Service Down!" | mail -s "ALERT" admin@windwatch.local`
+  },
+  deploy_yml: {
+    filename: '.github/workflows/deploy.yml',
+    desc: 'GitHub Actions workflow file automating Docker builds, registry pushes, and server deployments.',
+    code: `name: WindWatch CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: \${{ github.repository }}
+
+jobs:
+  build-and-push:
+    name: Build & Push to GHCR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: \${{ env.REGISTRY }}
+          username: \${{ github.actor }}
+          password: \${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: \${{ env.REGISTRY }}/\${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build and Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: \${{ steps.meta.outputs.tags }}
+          labels: \${{ steps.meta.outputs.labels }}
+
+  deploy:
+    name: Deploy to Target VM
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute Remote SSH CD Commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: \${{ secrets.DEPLOY_HOST }}
+          username: \${{ secrets.DEPLOY_USER }}
+          key: \${{ secrets.DEPLOY_SSH_KEY }}
+          port: 22
+          script: |
+            echo "\${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u \${{ github.actor }} --password-stdin
+            docker pull ghcr.io/\${{ env.IMAGE_NAME }}:latest
+            docker stop windwatch-app || true
+            docker rm windwatch-app || true
+            docker run -d --name windwatch-app -p 80:80 --restart always ghcr.io/\${{ env.IMAGE_NAME }}:latest
+            docker image prune -f`
   }
 };
 

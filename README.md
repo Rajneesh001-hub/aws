@@ -63,6 +63,12 @@ Orchestrates multi-container topologies:
 - **`db`**: Database container (MariaDB 10.11) with local persistence volume storage and health status checks.
 - **`cache`**: Memory cache layer (Redis 7) processing telemetry metrics high-frequency streams.
 
+### 5. Continuous Deployment Pipeline (`.github/workflows/deploy.yml`)
+Automates container builds, registry pushes, and deployment:
+- **Dockerfile**: Packages the web analytics dashboard into an Alpine Nginx image.
+- **GitHub Actions Workflow**: Runs on repository commits, authenticating automatically to GHCR (`ghcr.io`) using the system-supplied `${{ secrets.GITHUB_TOKEN }}`, builds the docker image, and pushes it to GHCR.
+- **Inline CD steps**: Executes commands on the remote VM via SSH to authenticate to GHCR, pull the updated container, stop and remove the outdated version, run the new deployment, and prune obsolete docker images automatically.
+
 ---
 
 ## Interactive Dashboard Features
