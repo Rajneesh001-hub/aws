@@ -347,6 +347,7 @@ jobs:
           key: \${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            set -euo pipefail
             echo "\${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u \${{ github.actor }} --password-stdin
             docker pull ghcr.io/\${{ env.IMAGE_NAME }}:latest
             docker stop windwatch-app || true
