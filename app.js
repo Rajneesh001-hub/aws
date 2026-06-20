@@ -342,9 +342,9 @@ jobs:
       - name: Execute Remote SSH CD Commands
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: \${{ secrets.DEPLOY_HOST }}
-          username: \${{ secrets.DEPLOY_USER }}
-          key: \${{ secrets.DEPLOY_SSH_KEY }}
+          host: \${{ secrets.EC2_HOST }}
+          username: \${{ secrets.EC2_USER }}
+          key: \${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
             echo "\${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u \${{ github.actor }} --password-stdin
