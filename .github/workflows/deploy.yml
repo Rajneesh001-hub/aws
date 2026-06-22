@@ -92,6 +92,7 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
             # 3. Pull latest images referenced in docker-compose.yml
+            export IMAGE_PATH="ghcr.io/${{ env.IMAGE_NAME }}:latest"
             docker compose pull
             
             # 4. Spin up the container services in detached mode

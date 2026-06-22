@@ -364,6 +364,7 @@ jobs:
             set -euo pipefail
             cd ~/windwatch
             echo "\${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u \${{ github.actor }} --password-stdin
+            export IMAGE_PATH="ghcr.io/\${{ env.IMAGE_NAME }}:latest"
             docker compose pull
             docker compose up -d
             docker image prune -f`
